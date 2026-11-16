@@ -39,6 +39,9 @@ const subjectSchema = z.object({
   fullMarks: z.number().positive().max(1000),
   passMarks: z.number().min(0).max(1000).optional(),
   isOptional: z.boolean().optional(),
+  examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid exam date').optional(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid start time').optional(),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid end time').optional(),
 });
 
 const subjectsSchema = z.array(subjectSchema).min(1).max(20);
@@ -72,7 +75,11 @@ const toExamSubjects = (subjects: z.infer<typeof subjectsSchema>): ExamSubject[]
     fullMarks: s.fullMarks,
     passMarks: s.passMarks ?? Math.ceil(s.fullMarks * 0.33),
     isOptional: s.isOptional ?? false,
-  }));
+    // schedule (printed on admit cards)
+    ...(s.examDate ? { examDate: s.examDate } : {}),
+    ...(s.startTime ? { startTime: s.startTime } : {}),
+    ...(s.endTime ? { endTime: s.endTime } : {}),
+  })) as ExamSubject[];
 
 // GET /api/exams
 router.get(
