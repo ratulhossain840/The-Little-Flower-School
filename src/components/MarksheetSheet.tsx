@@ -1,6 +1,7 @@
 // src/components/MarksheetSheet.tsx
 import { classLabel } from '@/utils/classes';
 import SchoolSheetHeader from './SchoolSheetHeader';
+import { useSchoolInfo } from '@/utils/cards';
 
 export interface MarksheetData {
   examName: string;
@@ -49,6 +50,7 @@ const Cell = ({ k, v }: { k: string; v?: string | number }) => (
 
 /** Printable marksheet (A4) with student details. */
 export default function MarksheetSheet({ data }: { data: MarksheetData }) {
+  const school = useSchoolInfo();
   const st = data.student;
   return (
     <div>
@@ -124,8 +126,13 @@ export default function MarksheetSheet({ data }: { data: MarksheetData }) {
       <div className="mt-14 flex justify-between text-[12px]">
         <div className="w-40 border-t border-black pt-1 text-center">শ্রেণি শিক্ষক</div>
         <div className="w-40 border-t border-black pt-1 text-center">অভিভাবক</div>
-        <div className="w-40 border-t border-black pt-1 text-center">প্রধান শিক্ষক</div>
+        <div className="relative w-40 border-t border-black pt-1 text-center">
+          {school.signature && (
+            <img src={school.signature} alt="" className="absolute bottom-full left-1/2 mb-0.5 h-11 max-w-[9rem] -translate-x-1/2 object-contain" />
+          )}
+          প্রধান শিক্ষক
+        </div>
       </div>
     </div>
   );
-            }
+              }
