@@ -24,6 +24,7 @@ export interface SchoolInfo {
   address: string;
   phone: string;
   email: string;
+  signature: string; // principal's signature image (optional)
 }
 
 export const DEFAULT_SCHOOL: SchoolInfo = {
@@ -33,6 +34,7 @@ export const DEFAULT_SCHOOL: SchoolInfo = {
   address: '',
   phone: '',
   email: '',
+  signature: '',
 };
 
 /** Reads the public school settings (name, address, phone, email). Falls back to defaults. */
@@ -48,6 +50,7 @@ export function useSchoolInfo(): SchoolInfo {
       address: txt(s.address),
       phone: txt(s.phone),
       email: txt(s.email),
+      signature: /^(data:image\/|https?:\/\/)/.test(txt(s.principalSignature)) ? txt(s.principalSignature) : '',
     };
   }, [res.data]);
 }
@@ -139,4 +142,4 @@ export function sortByRoll<T extends { roll?: number | string; studentId?: strin
     if (na !== nb) return na - nb;
     return String(a.studentId ?? '').localeCompare(String(b.studentId ?? ''));
   });
-}
+                   }
