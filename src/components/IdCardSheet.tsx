@@ -2,7 +2,7 @@
 // Student ID card (54 × 86 mm, navy & gold design) – front + back, printable on A4.
 import type { CSSProperties } from 'react';
 import QrCode from './QrCode';
-import { Box, BookMark, GoldDefs, ICONS, Icon, NAVY, GOLD, RoundLogo, exact } from './CardParts';
+import { Box, BookMark, GoldDefs, ICONS, Icon, NAVY, GOLD, RoundLogo, exact, useFitZoom } from './CardParts';
 import type { IdCardData, SchoolInfo } from '@/utils/cards';
 
 export const CARD_W = 204; // px  ≈ 54 mm
@@ -31,11 +31,11 @@ function nameSize(n: string): number {
 
 function Row({ icon, k, v }: { icon: string; k: string; v: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', height: 13.5, gap: 5 }}>
+    <div style={{ display: 'flex', alignItems: 'center', height: 12.5, gap: 5, whiteSpace: 'nowrap' }}>
       <Icon d={icon} size={11} />
-      <span style={{ width: 50, fontSize: 8, fontWeight: 700 }}>{k}</span>
+      <span style={{ width: 62, fontSize: 8, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>{k}</span>
       <span style={{ fontSize: 8, fontWeight: 700 }}>:</span>
-      <span style={{ fontSize: 8.5, fontWeight: 800, marginLeft: 1, whiteSpace: 'nowrap' }}>{v || '—'}</span>
+      <span style={{ fontSize: 8.3, fontWeight: 800, marginLeft: 1, whiteSpace: 'nowrap' }}>{v || '—'}</span>
     </div>
   );
 }
@@ -49,10 +49,10 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
   const line2 = words.slice(mid).join(' ');
   return (
     <div style={base}>
-      <svg width={CARD_W} height={118} viewBox="0 0 204 118" style={{ position: 'absolute', left: 0, top: 0, ...exact }}>
+      <svg width={CARD_W} height={124} viewBox="0 0 204 124" style={{ position: 'absolute', left: 0, top: 0, ...exact }}>
         <GoldDefs id="idg1" />
-        <path d="M0 0H204V50C150 50 80 70 0 118Z" fill={NAVY} />
-        <path d="M204 46C150 46 80 66 0 112L0 118C80 70 150 50 204 50Z" fill="url(#idg1)" />
+        <path d="M0 0H204V58C150 58 80 76 0 124Z" fill={NAVY} />
+        <path d="M204 54C150 54 80 72 0 118L0 124C80 76 150 58 204 58Z" fill="url(#idg1)" />
       </svg>
 
       <Box style={{ left: 7, top: 8 }}>
@@ -109,7 +109,7 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
         <div style={{ fontSize: 8.5, color: '#f3d77a', fontWeight: 700, lineHeight: 1.1, whiteSpace: 'nowrap' }}>{sub}</div>
       </Box>
 
-      <Box style={{ left: 12, top: 213, width: 150 }}>
+      <Box style={{ left: 12, top: 213, width: 184 }}>
         <Row icon={ICONS.person} k="Student ID" v={c.studentId} />
         <Row icon={ICONS.cap} k="Class" v={c.classLabel} />
         <Row icon={ICONS.group} k="Roll No." v={c.roll} />
@@ -121,7 +121,12 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
         <QrCode value={`TLFS|${c.studentId}`} size={36} />
       </Box>
 
-      <Box style={{ left: 14, top: 290, width: 84, borderTop: `1px solid ${NAVY}`, paddingTop: 1.5, fontSize: 7, fontWeight: 700, textAlign: 'center' }}>
+      {school.signature ? (
+        <Box style={{ left: 24, top: 276, width: 64, height: 18, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <img src={school.signature} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+        </Box>
+      ) : null}
+      <Box style={{ left: 14, top: 296, width: 84, borderTop: `1px solid ${NAVY}`, paddingTop: 1.5, fontSize: 7, fontWeight: 700, textAlign: 'center' }}>
         Principal’s Signature
       </Box>
 
@@ -227,6 +232,8 @@ const sheetCss = `
 .idc-page:last-child { page-break-after: auto; break-after: auto; }
 .idc-grid { display: grid; grid-template-columns: repeat(3, ${CARD_W}px); column-gap: 8mm; row-gap: 6mm; justify-content: center; }
 .idc-single { display: flex; gap: 8mm; justify-content: center; padding-top: 10mm; }
+@media print { .fit-zoom { zoom: 1 !important; } }
+@media screen { .idc-page { width: auto; height: auto; margin-bottom: 16px; } }
 `;
 
 /**
@@ -235,9 +242,10 @@ const sheetCss = `
  * (backs are mirrored left↔right so they line up when printed on both sides).
  */
 export default function IdCardSheet({ cards, school }: { cards: IdCardData[]; school: SchoolInfo }) {
+  const fit = useFitZoom(cards.length === 1 ? 470 : 700);
   if (cards.length === 1) {
     return (
-      <div className="idc-page" style={exact}>
+      <div className="idc-page fit-zoom" style={{ ...exact, ...fit }}>
         <style>{sheetCss}</style>
         <div className="idc-single">
           <IdCardFront c={cards[0]} school={school} />
@@ -259,7 +267,7 @@ export default function IdCardSheet({ cards, school }: { cards: IdCardData[]; sc
     return out;
   };
   return (
-    <div style={exact}>
+    <div className="fit-zoom" style={{ ...exact, ...fit }}>
       <style>{sheetCss}</style>
       {pages.flatMap((list, p) => [
         <div className="idc-page" key={`f${p}`}>
@@ -279,4 +287,4 @@ export default function IdCardSheet({ cards, school }: { cards: IdCardData[]; sc
       ])}
     </div>
   );
-    }
+}
