@@ -2,8 +2,8 @@
 // Exam admit card (190 × 132 mm, navy & gold design) – 2 cards per A4 page.
 import type { CSSProperties, ReactNode } from 'react';
 import QrCode from './QrCode';
-import { Box, GoldDefs, ICONS, NAVY, GOLD, RoundLogo, exact, useFitZoom } from './CardParts';
-import type { AdmitCardData, AdmitSubject, SchoolInfo } from '@/utils/cards';
+import { Box, GoldDefs, ICONS, NAVY, GOLD, RoundLogo, bnStyle, exact, useFitZoom } from './CardParts';
+import { verifyUrl, type AdmitCardData, type AdmitSubject, type SchoolInfo } from '@/utils/cards';
 
 const mm = (n: number) => `${n}mm`;
 
@@ -57,7 +57,7 @@ const val: CSSProperties = {
 export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo }) {
   const words = school.nameEn.toUpperCase();
   const hasSchedule = c.subjects.some((s) => s.examDate || s.startTime);
-  const rowH = Math.min(4.4, 30 / (c.subjects.length + 1.2));
+  const rowH = Math.min(4.4, 28 / (c.subjects.length + 1.2));
   const rowPx = `${rowH}mm`;
   const fs = rowH >= 4 ? 9 : rowH >= 3.5 ? 8 : 7;
   const th: CSSProperties = {
@@ -68,16 +68,18 @@ export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo 
     fontSize: fs, fontWeight: 700, border: `0.2mm solid ${NAVY}`, height: rowPx, padding: '0 4px', lineHeight: 1,
     textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', color: '#111',
   };
+  const rowMm = 4.8;
 
   const infoRows: Array<[string, ReactNode]> = [
     [
       'Student Name',
       <>
         {c.nameEn || c.nameBn}
-        {c.nameEn && c.nameBn ? <span style={{ fontWeight: 700, fontSize: 9.5 }}>  ({c.nameBn})</span> : null}
+        {c.nameEn && c.nameBn ? <span style={{ fontSize: 9.5, ...bnStyle(c.nameBn, 1.4) }}>  ({c.nameBn})</span> : null}
       </>,
     ],
     ["Father's Name", c.fatherName || '—'],
+    ["Mother's Name", c.motherName || '—'],
     ['Class', c.classLabel],
     ['Roll Number', c.roll || '—'],
     ['Student ID', c.studentId],
@@ -125,9 +127,9 @@ export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo 
       <table style={{ position: 'absolute', left: mm(6), top: mm(36), width: mm(116), borderCollapse: 'collapse', tableLayout: 'fixed' }}>
         <tbody>
           {infoRows.map(([k, v]) => (
-            <tr key={k} style={{ height: mm(5.3) }}>
+            <tr key={k} style={{ height: mm(rowMm) }}>
               <td style={lbl}>{k}</td>
-              <td style={val}>{v}</td>
+              <td style={{ ...val, ...(typeof v === 'string' ? bnStyle(v, 1.4) : {}) }}>{v}</td>
             </tr>
           ))}
         </tbody>
@@ -144,14 +146,14 @@ export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo 
 
       {/* QR */}
       <Box style={{ left: mm(159), top: mm(36), width: mm(26), height: mm(26), background: '#fff', border: '0.3mm solid #cfd6e4', boxSizing: 'border-box', padding: mm(1.2) }}>
-        <QrCode value={`TLFS|${c.studentId}|${c.admitNo}`} size={Math.round(23.6 * 3.78)} />
+        <QrCode value={verifyUrl(c.studentId)} size={Math.round(23.6 * 3.78)} />
       </Box>
       <Box style={{ left: mm(159), top: mm(63.5), width: mm(26), height: mm(7), background: NAVY, color: '#fff', borderRadius: mm(1.2), fontSize: 7.5, fontWeight: 800, textAlign: 'center', lineHeight: 1.15, display: 'flex', alignItems: 'center', justifyContent: 'center', ...exact }}>
         Scan for<br />Verification
       </Box>
 
       {/* routine */}
-      <table style={{ position: 'absolute', left: mm(6), top: mm(74.5), width: mm(178), borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+      <table style={{ position: 'absolute', left: mm(6), top: mm(77), width: mm(178), borderCollapse: 'collapse', tableLayout: 'fixed' }}>
         <thead>
           <tr>
             {hasSchedule && <th style={{ ...th, width: mm(52) }}>Exam Date</th>}
@@ -165,7 +167,7 @@ export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo 
             <tr key={`${s.name}-${i}`}>
               {hasSchedule && <td style={td}>{fmtDate(s.examDate) || '—'}</td>}
               {hasSchedule && <td style={td}>{timeRange(s) || '—'}</td>}
-              <td style={{ ...td, textAlign: 'left' }}>{s.name}{s.isOptional ? ' (Optional)' : ''}</td>
+              <td style={{ ...td, textAlign: 'left', ...bnStyle(s.name, 1.3) }}>{s.name}{s.isOptional ? ' (Optional)' : ''}</td>
               <td style={td}>{s.fullMarks}</td>
             </tr>
           ))}
@@ -230,4 +232,4 @@ export default function AdmitCardSheet({ cards, school }: { cards: AdmitCardData
       ))}
     </div>
   );
-    }
+                                              }
