@@ -11,6 +11,10 @@ export interface ExamSubject {
   fullMarks: number;
   passMarks: number;
   isOptional: boolean;
+  // schedule (optional, printed on admit cards)
+  examDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface ExamRecord {
@@ -141,7 +145,19 @@ export async function updateExam(id: string, updates: UpdateExamInput): Promise<
   if (updates.subjects !== undefined) {
     assertValidSubjects(updates.subjects);
     if (await hasResults(id)) {
-      throw badRequest('Cannot change subjects after results have been entered');
+      // after marks are entered only the schedule (date/time) may change
+      const same =
+        existing.subjects.length === updates.subjects.length &&
+        existing.subjects.every((o, i) => {
+          const n = updates.subjects![i];
+          return (
+            o.name === n.name &&
+            o.fullMarks === n.fullMarks &&
+            o.passMarks === n.passMarks &&
+            !!o.isOptional === !!n.isOptional
+          );
+        });
+      if (!same) throw badRequest('Cannot change subjects after results have been entered');
     }
     patch.subjects = updates.subjects;
   }
@@ -181,4 +197,4 @@ export async function deleteExam(id: string): Promise<void> {
     throw badRequest('Cannot delete an exam that has results');
   }
   await db.collection(EXAMS_COLLECTION).doc(id).delete();
-    }
+        }
