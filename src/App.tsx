@@ -19,6 +19,7 @@ const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const FAQPage = lazy(() => import('@/pages/FAQPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const VerifyPage = lazy(() => import('@/pages/VerifyPage'));
 
 /* ── Admin pages (lazy) ── */
 const LoginPage = lazy(() => import('@/features/admin/LoginPage'));
@@ -119,6 +120,7 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/faq" element={<FAQPage />} />
+          <Route path="/v/:studentId" element={<VerifyPage />} />
         </Route>
 
         {/* ── 404 ── */}
