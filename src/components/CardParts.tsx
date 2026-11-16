@@ -1,11 +1,25 @@
 // src/components/CardParts.tsx
 // Shared colours + small pieces for the ID card and the admit card (navy & gold design).
+import { useEffect, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
 export const NAVY = '#0b1f4f';
 export const NAVY_2 = '#12306e';
 export const GOLD = '#c9a227';
 export const GOLD_LIGHT = '#f3d77a';
+
+/** Shrinks the preview to fit narrow (phone) screens. Printing is never scaled (see .fit-zoom in the sheets' CSS). */
+export function useFitZoom(basePx: number): CSSProperties {
+  const calc = () => (typeof window === 'undefined' ? 1 : Math.min(1, Math.max(0.3, (window.innerWidth - 24) / basePx)));
+  const [z, setZ] = useState(calc);
+  useEffect(() => {
+    const on = () => setZ(calc());
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basePx]);
+  return { zoom: z } as CSSProperties;
+}
 
 export const exact: CSSProperties = {
   WebkitPrintColorAdjust: 'exact',
@@ -97,4 +111,4 @@ export function BookMark({ width }: { width: number }) {
 
 export function Box({ children, style }: { children?: ReactNode; style?: CSSProperties }) {
   return <div style={{ position: 'absolute', ...style }}>{children}</div>;
-  }
+      }
