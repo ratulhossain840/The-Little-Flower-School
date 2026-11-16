@@ -6,6 +6,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useApi, useApiGet } from '../../../hooks/useApi';
 import ExamFormModal from './ExamFormModal';
 import ResultsPublishModal from './ResultsPublishModal';
+import { AdmitCardsModal, IdCardsClassModal } from '../cards/CardModals';
 
 interface ClassOption {
   id: string;
@@ -23,6 +24,9 @@ interface ExamSubject {
   fullMarks: number;
   passMarks?: number;
   isOptional?: boolean;
+  examDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 interface ExamRecord {
@@ -63,6 +67,8 @@ export default function ExamsListPage() {
   const publishedFilter = (params.get('published') ?? '') as '' | 'true' | 'false';
 
   const [showNew, setShowNew] = useState(false);
+  const [showIdCards, setShowIdCards] = useState(false);
+  const [admitFor, setAdmitFor] = useState<ExamRecord | null>(null);
   const [editing, setEditing] = useState<ExamRecord | null>(null);
   const [publishing, setPublishing] = useState<ExamRecord | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<ExamRecord | null>(null);
@@ -130,11 +136,20 @@ export default function ExamsListPage() {
             {items.length.toLocaleString(isBengali ? 'bn-BD' : 'en-US')}
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowIdCards(true)}
+            className="rounded border border-navy/30 px-4 py-2 text-sm font-medium text-navy hover:bg-navy/5"
+          >
+            {tr('আইডি কার্ড (শ্রেণি)', 'ID cards (class)')}
+          </button>
         {canWrite && (
           <button type="button" onClick={() => setShowNew(true)} className="btn-primary">
             {tr('নতুন পরীক্ষা', 'New exam')}
           </button>
         )}
+        </div>
       </div>
 
       {isWaking && (
@@ -256,6 +271,13 @@ export default function ExamsListPage() {
                       >
                         {tr('নম্বর', 'Marks')}
                       </Link>
+                      <button
+                        type="button"
+                        onClick={() => setAdmitFor(ex)}
+                        className="text-sm font-medium text-royal hover:underline"
+                      >
+                        {tr('এডমিট কার্ড', 'Admit cards')}
+                      </button>
                       {canWrite && (
                         <>
                           <button
@@ -315,6 +337,8 @@ export default function ExamsListPage() {
           }}
         />
       )}
+      {showIdCards && <IdCardsClassModal classes={classes} onClose={() => setShowIdCards(false)} />}
+      {admitFor && <AdmitCardsModal exam={admitFor} onClose={() => setAdmitFor(null)} />}
       {publishing && (
         <ResultsPublishModal
           exam={publishing}
@@ -366,4 +390,4 @@ export default function ExamsListPage() {
       )}
     </div>
   );
-      }
+}
