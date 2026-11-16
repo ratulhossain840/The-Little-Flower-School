@@ -55,6 +55,12 @@ export function useSchoolInfo(): SchoolInfo {
   }, [res.data]);
 }
 
+/** Address opened when the QR code on a card is scanned (public check page). */
+export function verifyUrl(studentId: string): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${origin}/v/${encodeURIComponent(studentId)}`;
+}
+
 export interface IdCardData {
   studentId: string;
   nameBn: string;
@@ -142,4 +148,4 @@ export function sortByRoll<T extends { roll?: number | string; studentId?: strin
     if (na !== nb) return na - nb;
     return String(a.studentId ?? '').localeCompare(String(b.studentId ?? ''));
   });
-                   }
+  }
