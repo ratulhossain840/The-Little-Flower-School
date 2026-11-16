@@ -2,6 +2,7 @@
 import type { AdmissionFormData } from '@/utils/admissionForm';
 import { classLabel } from '@/utils/classes';
 import SchoolSheetHeader from './SchoolSheetHeader';
+import { useSchoolInfo } from '@/utils/cards';
 
 const GENDER: Record<string, string> = { male: 'ছেলে / Male', female: 'মেয়ে / Female', other: 'অন্যান্য / Other' };
 
@@ -31,6 +32,7 @@ function Row({ label, value, wide }: { label: string; value?: string; wide?: boo
 
 /** Printable admission form (A4) with the passport photo at the top right. */
 export default function AdmissionFormSheet({ data }: { data: AdmissionFormData }) {
+  const school = useSchoolInfo();
   const s = data.student;
   const g = data.guardian;
   return (
@@ -95,8 +97,13 @@ export default function AdmissionFormSheet({ data }: { data: AdmissionFormData }
 
       <div className="mt-12 flex justify-between text-[12px]">
         <div className="w-44 border-t border-black pt-1 text-center">অভিভাবকের স্বাক্ষর</div>
-        <div className="w-44 border-t border-black pt-1 text-center">অধ্যক্ষ / প্রধান শিক্ষকের স্বাক্ষর</div>
+        <div className="relative w-44 border-t border-black pt-1 text-center">
+          {school.signature && (
+            <img src={school.signature} alt="" className="absolute bottom-full left-1/2 mb-0.5 h-11 max-w-[10rem] -translate-x-1/2 object-contain" />
+          )}
+          অধ্যক্ষ / প্রধান শিক্ষকের স্বাক্ষর
+        </div>
       </div>
     </div>
   );
-                                     }
+          }
