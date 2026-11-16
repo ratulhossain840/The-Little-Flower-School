@@ -2,7 +2,7 @@
 // Exam admit card (190 × 132 mm, navy & gold design) – 2 cards per A4 page.
 import type { CSSProperties, ReactNode } from 'react';
 import QrCode from './QrCode';
-import { Box, GoldDefs, ICONS, NAVY, GOLD, RoundLogo, exact } from './CardParts';
+import { Box, GoldDefs, ICONS, NAVY, GOLD, RoundLogo, exact, useFitZoom } from './CardParts';
 import type { AdmitCardData, AdmitSubject, SchoolInfo } from '@/utils/cards';
 
 const mm = (n: number) => `${n}mm`;
@@ -189,6 +189,11 @@ export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo 
       <Box style={{ left: mm(120), top: mm(117), width: mm(32), borderTop: `0.3mm solid ${NAVY}`, paddingTop: mm(0.6), fontSize: 7.6, fontWeight: 800, textAlign: 'center' }}>
         Controller of Examinations
       </Box>
+      {school.signature ? (
+        <Box style={{ left: mm(158), top: mm(109.5), width: mm(24), height: mm(7.3), display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <img src={school.signature} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+        </Box>
+      ) : null}
       <Box style={{ left: mm(156), top: mm(117), width: mm(28), borderTop: `0.3mm solid ${NAVY}`, paddingTop: mm(0.6), fontSize: 7.6, fontWeight: 800, textAlign: 'center' }}>
         Principal
       </Box>
@@ -204,14 +209,17 @@ export function AdmitCard({ c, school }: { c: AdmitCardData; school: SchoolInfo 
 const css = `
 @page { size: A4; margin: 8mm; }
 .adc-page { width: 194mm; height: 280mm; overflow: hidden; page-break-after: always; break-after: page; display: flex; flex-direction: column; align-items: center; gap: 6mm; }
+@media print { .fit-zoom { zoom: 1 !important; } }
+@media screen { .adc-page { width: auto; height: auto; margin-bottom: 16px; } }
 .adc-page:last-child { page-break-after: auto; break-after: auto; }
 `;
 
 export default function AdmitCardSheet({ cards, school }: { cards: AdmitCardData[]; school: SchoolInfo }) {
+  const fit = useFitZoom(730);
   const pages: AdmitCardData[][] = [];
   for (let i = 0; i < cards.length; i += 2) pages.push(cards.slice(i, i + 2));
   return (
-    <div style={exact}>
+    <div className="fit-zoom" style={{ ...exact, ...fit }}>
       <style>{css}</style>
       {pages.map((list, p) => (
         <div className="adc-page" key={p}>
@@ -222,4 +230,4 @@ export default function AdmitCardSheet({ cards, school }: { cards: AdmitCardData
       ))}
     </div>
   );
-      }
+    }
