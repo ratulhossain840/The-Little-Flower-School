@@ -42,6 +42,8 @@ export interface SchoolSettings {
   admissionText: string;
   /** e.g. "রবি–বৃহস্পতি, সকাল ৯টা – দুপুর ২টা" */
   officeHours: string;
+  /** Head teacher's signature image (small data URL), printed on cards / marksheets / forms */
+  principalSignature: string;
 }
 
 const DEFAULT_SETTINGS: SchoolSettings = {
@@ -63,6 +65,7 @@ const DEFAULT_SETTINGS: SchoolSettings = {
   aboutText: '',
   admissionText: '',
   officeHours: '',
+  principalSignature: '',
 };
 
 /**
@@ -122,4 +125,4 @@ export async function ensureDefaultSettings(): Promise<void> {
     });
     console.log('[SETTINGS] Created default school settings');
   }
-    }
+  }
