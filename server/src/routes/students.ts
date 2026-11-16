@@ -83,6 +83,35 @@ router.get(
   })
 );
 
+// All active students of a class with their admission data (photo, parents…) – for ID / admit cards.
+// Must stay above '/:id'.
+router.get(
+  '/cards',
+  verifyToken,
+  requireRole(...READ_ROLES),
+  ah(async (req, res) => {
+    const { classId } = parse(z.object({ classId: z.string().trim().min(1).max(20) }), req.query);
+    const { items } = await listStudents({ classId, isActive: true, page: 1, pageSize: 500 });
+    items.sort((a, b) => {
+      const ra = Number(a.roll);
+      const rb = Number(b.roll);
+      const na = Number.isFinite(ra) && a.roll != null ? ra : 99999;
+      const nb = Number.isFinite(rb) && b.roll != null ? rb : 99999;
+      return na - nb || String(a.studentId).localeCompare(String(b.studentId));
+    });
+    const out = await Promise.all(
+      items.map(async (s) => {
+        let application = null;
+        if (s.applicationId) {
+          application = await getApplicationByApplicationId(String(s.applicationId)).catch(() => null);
+        }
+        return { ...s, application };
+      })
+    );
+    res.json({ items: out });
+  })
+);
+
 router.get(
   '/:id',
   verifyToken,
