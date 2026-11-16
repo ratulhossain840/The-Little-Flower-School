@@ -31,6 +31,7 @@ import expensesRoutes from './routes/expenses';
 import settingsRoutes from './routes/settings';
 import usersRoutes from './routes/users';
 import publicRoutes from './routes/public';
+import verifyRoutes from './routes/verify';
 import auditRoutes from './routes/audit';
 import backupRoutes from './routes/backup';
 import classesRoutes from './routes/classes';
@@ -88,6 +89,7 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/faq', faqRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/verify', verifyRoutes); // public: QR-code check of an ID / admit card
 app.use('/api/students', studentsRoutes);
 app.use('/api/teachers', teachersRoutes);
 app.use('/api/attendance', attendanceRoutes);
