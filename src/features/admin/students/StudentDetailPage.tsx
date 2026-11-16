@@ -8,6 +8,8 @@ import StudentFormModal from './StudentFormModal';
 import PrintOverlay from '@/components/PrintOverlay';
 import AdmissionFormSheet from '@/components/AdmissionFormSheet';
 import { buildAdmissionForm, txt } from '@/utils/admissionForm';
+import IdCardSheet from '@/components/IdCardSheet';
+import { buildIdCard, useSchoolInfo } from '@/utils/cards';
 
 interface StudentRecord {
   id: string;
@@ -103,6 +105,8 @@ export default function StudentDetailPage() {
 
   const [showEdit, setShowEdit] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showIdCard, setShowIdCard] = useState(false);
+  const school = useSchoolInfo();
   const [actionError, setActionError] = useState<string | null>(null);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
 
@@ -253,6 +257,13 @@ export default function StudentDetailPage() {
             className="rounded bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy/90"
           >
             {tr('ভর্তি ফরম প্রিন্ট / PDF', 'Admission form / PDF')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowIdCard(true)}
+            className="rounded bg-gold px-4 py-2 text-sm font-medium text-navy hover:opacity-90"
+          >
+            {tr('আইডি কার্ড', 'ID card')}
           </button>
           {canWrite && (
             <>
@@ -436,6 +447,12 @@ export default function StudentDetailPage() {
         />
       )}
 
+      {showIdCard && (
+        <PrintOverlay onClose={() => setShowIdCard(false)}>
+          <IdCardSheet cards={[buildIdCard(student)]} school={school} />
+        </PrintOverlay>
+      )}
+
       {showForm && (
         <PrintOverlay onClose={() => setShowForm(false)}>
           <AdmissionFormSheet data={form} />
@@ -503,4 +520,4 @@ function Field({
       <dd className="mt-0.5 text-ink">{value || '—'}</dd>
     </div>
   );
-                                         }
+                                                }
