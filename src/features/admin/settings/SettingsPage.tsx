@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useApi, useApiGet } from '../../../hooks/useApi';
 import { useLanguage } from '../../../hooks/useLanguage';
+import { signatureFromFile } from '../../../utils/signature';
 
 type Json = Record<string, unknown>;
 
@@ -139,15 +140,43 @@ export default function SettingsPage() {
   const [formError, setFormError] = useState('');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [signature, setSignature] = useState('');
+  const [sigBusy, setSigBusy] = useState(false);
+  const [sigMsg, setSigMsg] = useState('');
 
   useEffect(() => {
     if (loaded) {
       const f = toForm(loaded);
       setOriginal(f);
       setForm(f);
+      setSignature(typeof loaded.principalSignature === 'string' ? loaded.principalSignature : '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  const saveSignature = async (value: string) => {
+    setSigBusy(true);
+    setSigMsg('');
+    try {
+      await save.execute('/api/settings', { principalSignature: value });
+      setSignature(value);
+      setSigMsg(value ? tr('সই সংরক্ষিত হয়েছে।', 'Signature saved.') : tr('সই মুছে ফেলা হয়েছে।', 'Signature removed.'));
+    } catch (err) {
+      setSigMsg(err instanceof Error ? err.message : tr('সংরক্ষণ করা যায়নি', 'Could not save'));
+    } finally {
+      setSigBusy(false);
+    }
+  };
+
+  const pickSignature = async (file: File | undefined) => {
+    if (!file) return;
+    setSigMsg('');
+    try {
+      await saveSignature(await signatureFromFile(file));
+    } catch {
+      setSigMsg(tr('ছবিটি প্রসেস করা যায়নি। সাদা কাগজে কালো কলমের সই পরিষ্কার আলোয় তুলে আবার দিন।', 'Could not process the image. Photograph the signature on white paper in good light.'));
+    }
+  };
 
   const changedKeys = FIELDS.filter((f) => form[f.key].trim() !== original[f.key].trim()).map((f) => f.key);
 
@@ -268,6 +297,52 @@ export default function SettingsPage() {
             </div>
           ))}
 
+          <div className="card space-y-3">
+            <div>
+              <h2 className="text-base font-bold text-navy">{tr('প্রধান শিক্ষকের সই', "Head teacher's signature")}</h2>
+              <p className="mt-1 text-xs text-ink/60">
+                {tr(
+                  'সাদা কাগজে কালো কলমে সই করে পরিষ্কার আলোয় ছবি তুলুন, তারপর এখানে দিন। সই নিজে থেকে আইডি কার্ড, এডমিট কার্ড, মার্কশিট ও ভর্তি ফরমে বসবে। শুধু প্রধান শিক্ষকের অনুমতি নিয়ে দিন।',
+                  'Sign on white paper with a dark pen, photograph it in good light and upload it here. It is printed automatically on ID cards, admit cards, marksheets and forms. Upload only with the head teacher’s permission.',
+                )}
+              </p>
+            </div>
+            {signature ? (
+              <div className="inline-block rounded border border-border bg-white p-3">
+                <img src={signature} alt="" className="h-16 object-contain" />
+              </div>
+            ) : (
+              <p className="text-sm text-ink/60">{tr('এখনো কোনো সই দেওয়া হয়নি।', 'No signature uploaded yet.')}</p>
+            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <label className={`btn-primary cursor-pointer ${sigBusy ? 'opacity-60' : ''}`}>
+                {sigBusy ? tr('অপেক্ষা করুন…', 'Please wait…') : signature ? tr('সই বদলান', 'Change signature') : tr('সইয়ের ছবি দিন', 'Upload signature')}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={sigBusy}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = '';
+                    void pickSignature(f);
+                  }}
+                />
+              </label>
+              {signature && (
+                <button
+                  type="button"
+                  disabled={sigBusy}
+                  onClick={() => void saveSignature('')}
+                  className="rounded border border-navy/30 px-3 py-2 text-sm text-navy"
+                >
+                  {tr('মুছুন', 'Remove')}
+                </button>
+              )}
+            </div>
+            {sigMsg && <p className="text-sm text-ink">{sigMsg}</p>}
+          </div>
+
           {formError && <p className="error-text">{formError}</p>}
           {saved && <p className="text-sm text-green-700">{tr('সংরক্ষিত হয়েছে।', 'Saved.')}</p>}
           {!saved && changedKeys.length === 0 && !isLoading && (
@@ -287,4 +362,4 @@ export default function SettingsPage() {
       )}
     </div>
   );
-        }
+    }
