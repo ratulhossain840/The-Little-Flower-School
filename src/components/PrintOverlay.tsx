@@ -1,6 +1,6 @@
 // src/components/PrintOverlay.tsx
 import { createPortal } from 'react-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Printer, X } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -11,6 +11,17 @@ import { useLanguage } from '@/hooks/useLanguage';
  */
 export default function PrintOverlay({ onClose, children }: { onClose: () => void; children: ReactNode }) {
   const { isBengali } = useLanguage();
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  // After the print dialog closes the browser may leave the page scrolled sideways, hiding the toolbar.
+  useEffect(() => {
+    const back = () => {
+      boxRef.current?.scrollTo({ left: 0, top: 0 });
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener('afterprint', back);
+    return () => window.removeEventListener('afterprint', back);
+  }, []);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -21,7 +32,7 @@ export default function PrintOverlay({ onClose, children }: { onClose: () => voi
   }, []);
 
   return createPortal(
-    <div className="print-overlay fixed inset-0 z-[100] overflow-auto bg-gray-300">
+    <div ref={boxRef} className="print-overlay fixed inset-0 z-[100] overflow-auto bg-gray-300">
       <style>{`
         @page { size: A4; margin: 8mm; }
         @media print {
@@ -33,7 +44,7 @@ export default function PrintOverlay({ onClose, children }: { onClose: () => voi
         }
       `}</style>
 
-      <div className="no-print sticky top-0 z-10 flex flex-wrap items-center gap-2 bg-navy px-3 py-2 text-white shadow">
+      <div className="no-print sticky left-0 top-0 z-10 flex w-full max-w-[100vw] flex-wrap items-center gap-2 bg-navy px-3 py-2 text-white shadow">
         <button
           type="button"
           onClick={() => window.print()}
@@ -63,4 +74,4 @@ export default function PrintOverlay({ onClose, children }: { onClose: () => voi
     </div>,
     document.body,
   );
-}
+  }
