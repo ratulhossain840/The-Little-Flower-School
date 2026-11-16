@@ -10,7 +10,13 @@ export const GOLD_LIGHT = '#f3d77a';
 
 /** Shrinks the preview to fit narrow (phone) screens. Printing is never scaled (see .fit-zoom in the sheets' CSS). */
 export function useFitZoom(basePx: number): CSSProperties {
-  const calc = () => (typeof window === 'undefined' ? 1 : Math.min(1, Math.max(0.3, (window.innerWidth - 24) / basePx)));
+  const calc = () => {
+    if (typeof window === 'undefined') return 1;
+    const vw = window.innerWidth;
+    // the preview sheet has a max width of 794px and 20px (phone) / 32px (larger) side padding
+    const avail = Math.min(vw, 794) - (vw >= 640 ? 64 : 40) - 4;
+    return Math.min(1, Math.max(0.3, avail / basePx));
+  };
   const [z, setZ] = useState(calc);
   useEffect(() => {
     const on = () => setZ(calc());
@@ -19,6 +25,15 @@ export function useFitZoom(basePx: number): CSSProperties {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePx]);
   return { zoom: z } as CSSProperties;
+}
+
+export const BN_FONT = "'Hind Siliguri','Noto Sans Bengali','Inter',sans-serif";
+const BN_RE = /[\u0980-\u09FF]/;
+/** Bangla text needs its own font and a taller line, otherwise the marks above/below letters get cut or look rough. */
+export function bnStyle(text: string | undefined, lineHeight = 1.5): CSSProperties {
+  return text && BN_RE.test(text)
+    ? ({ fontFamily: BN_FONT, lineHeight, letterSpacing: 0, fontWeight: 600 } as CSSProperties)
+    : {};
 }
 
 export const exact: CSSProperties = {
@@ -111,4 +126,4 @@ export function BookMark({ width }: { width: number }) {
 
 export function Box({ children, style }: { children?: ReactNode; style?: CSSProperties }) {
   return <div style={{ position: 'absolute', ...style }}>{children}</div>;
-      }
+                    }
