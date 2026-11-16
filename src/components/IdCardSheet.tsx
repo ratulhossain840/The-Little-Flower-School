@@ -2,8 +2,8 @@
 // Student ID card (54 × 86 mm, navy & gold design) – front + back, printable on A4.
 import type { CSSProperties } from 'react';
 import QrCode from './QrCode';
-import { Box, BookMark, GoldDefs, ICONS, Icon, NAVY, GOLD, RoundLogo, exact, useFitZoom } from './CardParts';
-import type { IdCardData, SchoolInfo } from '@/utils/cards';
+import { Box, BookMark, GoldDefs, ICONS, Icon, NAVY, GOLD, RoundLogo, bnStyle, exact, useFitZoom } from './CardParts';
+import { verifyUrl, type IdCardData, type SchoolInfo } from '@/utils/cards';
 
 export const CARD_W = 204; // px  ≈ 54 mm
 export const CARD_H = 325; // px  ≈ 86 mm
@@ -68,10 +68,10 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
 
       <Box
         style={{
-          left: 60,
-          top: 70,
-          width: 84,
-          height: 100,
+          left: 62,
+          top: 66,
+          width: 80,
+          height: 94,
           borderRadius: 8,
           border: `2px solid ${GOLD}`,
           boxSizing: 'border-box',
@@ -90,7 +90,7 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
       <Box
         style={{
           left: 10,
-          top: 177,
+          top: 165,
           width: 184,
           height: 30,
           background: NAVY,
@@ -105,11 +105,11 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
           ...exact,
         }}
       >
-        <div style={{ fontSize: nameSize(main), fontWeight: 800, lineHeight: 1.05, whiteSpace: 'nowrap' }}>{main}</div>
-        <div style={{ fontSize: 8.5, color: '#f3d77a', fontWeight: 700, lineHeight: 1.1, whiteSpace: 'nowrap' }}>{sub}</div>
+        <div style={{ fontSize: nameSize(main), fontWeight: 800, lineHeight: 1.2, whiteSpace: 'nowrap', ...bnStyle(main, 1.35), ...(bnStyle(main).fontWeight ? { fontWeight: 700 } : {}) }}>{main}</div>
+        <div style={{ fontSize: 8.5, color: '#f3d77a', fontWeight: 700, lineHeight: 1.3, whiteSpace: 'nowrap', ...bnStyle(sub, 1.35) }}>{sub}</div>
       </Box>
 
-      <Box style={{ left: 12, top: 213, width: 184 }}>
+      <Box style={{ left: 12, top: 198, width: 184 }}>
         <Row icon={ICONS.person} k="Student ID" v={c.studentId} />
         <Row icon={ICONS.cap} k="Class" v={c.classLabel} />
         <Row icon={ICONS.group} k="Roll No." v={c.roll} />
@@ -117,12 +117,12 @@ export function IdCardFront({ c, school }: { c: IdCardData; school: SchoolInfo }
         {c.bloodGroup ? <Row icon={ICONS.drop} k="Blood Group" v={c.bloodGroup} /> : null}
       </Box>
 
-      <Box style={{ left: 155, top: 262, width: 42, height: 42, background: '#fff', padding: 2, boxSizing: 'border-box', border: `1px solid ${GOLD}`, borderRadius: 3 }}>
-        <QrCode value={`TLFS|${c.studentId}`} size={36} />
+      <Box style={{ left: 142, top: 254, width: 56, height: 56, background: '#fff', padding: 2, boxSizing: 'border-box', border: `1px solid ${GOLD}`, borderRadius: 3 }}>
+        <QrCode value={verifyUrl(c.studentId)} size={50} />
       </Box>
 
       {school.signature ? (
-        <Box style={{ left: 24, top: 276, width: 64, height: 18, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+        <Box style={{ left: 24, top: 270, width: 64, height: 20, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           <img src={school.signature} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
         </Box>
       ) : null}
@@ -142,7 +142,7 @@ function InfoLine({ icon, text }: { icon: string; text: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 5 }}>
       <Icon d={icon} size={13} />
-      <span style={{ fontSize: 8.3, fontWeight: 600, lineHeight: 1.2, wordBreak: 'break-word' }}>{text}</span>
+      <span style={{ fontSize: 8.3, fontWeight: 600, lineHeight: 1.25, wordBreak: 'break-word', ...bnStyle(text, 1.4) }}>{text}</span>
     </div>
   );
 }
@@ -205,7 +205,7 @@ export function IdCardBack({ c, school }: { c: IdCardData; school: SchoolInfo })
             padding: '3px 6px', fontSize: 7.4, lineHeight: 1.3,
           }}
         >
-          <div><b>Guardian:</b> {c.guardianName || '—'}</div>
+          <div><b>Guardian:</b> <span style={bnStyle(c.guardianName, 1.4)}>{c.guardianName || '—'}</span></div>
           <div><b>Mobile:</b> {c.guardianMobile}{c.session ? <>  ·  <b>Session:</b> {c.session}</> : null}</div>
         </Box>
       ) : null}
@@ -287,4 +287,4 @@ export default function IdCardSheet({ cards, school }: { cards: IdCardData[]; sc
       ])}
     </div>
   );
-}
+          }
