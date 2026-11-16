@@ -15,6 +15,9 @@ interface ExamSubject {
   fullMarks: number;
   passMarks?: number;
   isOptional?: boolean;
+  examDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 interface ExamForEdit {
@@ -40,6 +43,9 @@ interface SubjectRow {
   fullMarks: string;
   passMarks: string;
   isOptional: boolean;
+  examDate: string;
+  startTime: string;
+  endTime: string;
 }
 
 const EMPTY_SUBJECT: SubjectRow = {
@@ -47,6 +53,9 @@ const EMPTY_SUBJECT: SubjectRow = {
   fullMarks: '100',
   passMarks: '',
   isOptional: false,
+  examDate: '',
+  startTime: '',
+  endTime: '',
 };
 
 export default function ExamFormModal({ mode, classes, exam, onClose, onSaved }: ExamFormModalProps) {
@@ -66,6 +75,9 @@ export default function ExamFormModal({ mode, classes, exam, onClose, onSaved }:
           fullMarks: String(s.fullMarks),
           passMarks: s.passMarks != null ? String(s.passMarks) : '',
           isOptional: !!s.isOptional,
+          examDate: s.examDate ?? '',
+          startTime: s.startTime ?? '',
+          endTime: s.endTime ?? '',
         }))
       : [{ ...EMPTY_SUBJECT }],
   );
@@ -132,6 +144,9 @@ export default function ExamFormModal({ mode, classes, exam, onClose, onSaved }:
       const sub: ExamSubject = { name: s.name.trim(), fullMarks: Number(s.fullMarks) };
       if (s.passMarks.trim()) sub.passMarks = Number(s.passMarks);
       if (s.isOptional) sub.isOptional = true;
+      if (s.examDate) sub.examDate = s.examDate;
+      if (s.startTime) sub.startTime = s.startTime;
+      if (s.endTime) sub.endTime = s.endTime;
       return sub;
     });
     const payload: Record<string, unknown> = { name: name.trim(), subjects: payloadSubjects };
@@ -283,6 +298,35 @@ export default function ExamFormModal({ mode, classes, exam, onClose, onSaved }:
                     />
                   </div>
                 </div>
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div>
+                    <label className="text-xs text-ink/60">{tr('পরীক্ষার তারিখ', 'Exam date')}</label>
+                    <input
+                      type="date"
+                      value={s.examDate}
+                      onChange={(e) => updateSubject(i, 'examDate', e.target.value)}
+                      className="input-field w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink/60">{tr('শুরুর সময়', 'Start time')}</label>
+                    <input
+                      type="time"
+                      value={s.startTime}
+                      onChange={(e) => updateSubject(i, 'startTime', e.target.value)}
+                      className="input-field w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink/60">{tr('শেষ সময়', 'End time')}</label>
+                    <input
+                      type="time"
+                      value={s.endTime}
+                      onChange={(e) => updateSubject(i, 'endTime', e.target.value)}
+                      className="input-field w-full"
+                    />
+                  </div>
+                </div>
                 <label className="mt-2 flex items-center gap-2 text-sm text-ink/80">
                   <input
                     type="checkbox"
@@ -299,6 +343,12 @@ export default function ExamFormModal({ mode, classes, exam, onClose, onSaved }:
             {tr(
               'নিয়ম: বাংলা, ইংরেজি ও গণিতে পাস করতেই হবে (শিক্ষক বদলাতে পারবেন না)। অন্য বিষয়ে ফেল করলে শিক্ষক/অ্যাডমিন "বিবেচনায় পাস" দিতে পারবেন।',
               'Rule: Bangla, English and Maths must be passed (cannot be overridden). For other subjects a teacher/admin may pass a student by consideration.',
+            )}
+          </p>
+          <p className="text-xs text-ink/60">
+            {tr(
+              'তারিখ ও সময় (ঐচ্ছিক) এডমিট কার্ডে ছাপা হবে।',
+              'Date and time (optional) are printed on the admit card.',
             )}
           </p>
           <p className="text-xs text-ink/60">
@@ -331,4 +381,4 @@ export default function ExamFormModal({ mode, classes, exam, onClose, onSaved }:
       </form>
     </div>
   );
-}
+    }
