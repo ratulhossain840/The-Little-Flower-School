@@ -59,6 +59,11 @@ const updateSchema = z
     principalName: z.string().trim().max(100),
     principalTitle: z.string().trim().max(100),
     principalMessage: z.string().trim().max(2000),
+    // small compressed image (data URL); empty string removes it
+    principalSignature: z
+      .string()
+      .max(200_000)
+      .refine((v) => v === '' || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(v), 'Invalid image'),
     admissionOpen: z.boolean(),
   })
   .partial()
