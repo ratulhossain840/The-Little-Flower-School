@@ -2,7 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useApi, useApiGet } from '../../../hooks/useApi';
 import { useLanguage } from '../../../hooks/useLanguage';
-import { signatureFromFile } from '../../../utils/signature';
+import SignaturePad from '../../../components/SignaturePad';
 
 type Json = Record<string, unknown>;
 
@@ -143,6 +143,7 @@ export default function SettingsPage() {
   const [signature, setSignature] = useState('');
   const [sigBusy, setSigBusy] = useState(false);
   const [sigMsg, setSigMsg] = useState('');
+  const [padOpen, setPadOpen] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -168,15 +169,6 @@ export default function SettingsPage() {
     }
   };
 
-  const pickSignature = async (file: File | undefined) => {
-    if (!file) return;
-    setSigMsg('');
-    try {
-      await saveSignature(await signatureFromFile(file));
-    } catch {
-      setSigMsg(tr('ছবিটি প্রসেস করা যায়নি। সাদা কাগজে কালো কলমের সই পরিষ্কার আলোয় তুলে আবার দিন।', 'Could not process the image. Photograph the signature on white paper in good light.'));
-    }
-  };
 
   const changedKeys = FIELDS.filter((f) => form[f.key].trim() !== original[f.key].trim()).map((f) => f.key);
 
@@ -302,8 +294,8 @@ export default function SettingsPage() {
               <h2 className="text-base font-bold text-navy">{tr('প্রধান শিক্ষকের সই', "Head teacher's signature")}</h2>
               <p className="mt-1 text-xs text-ink/60">
                 {tr(
-                  'সাদা কাগজে কালো কলমে সই করে পরিষ্কার আলোয় ছবি তুলুন, তারপর এখানে দিন। সই নিজে থেকে আইডি কার্ড, এডমিট কার্ড, মার্কশিট ও ভর্তি ফরমে বসবে। শুধু প্রধান শিক্ষকের অনুমতি নিয়ে দিন।',
-                  'Sign on white paper with a dark pen, photograph it in good light and upload it here. It is printed automatically on ID cards, admit cards, marksheets and forms. Upload only with the head teacher’s permission.',
+                  '"সই করুন" চেপে আঙুল দিয়ে সাদা বক্সে সই আঁকুন। সই নিজে থেকে আইডি কার্ড, এডমিট কার্ড, মার্কশিট ও ভর্তি ফরমে বসবে। শুধু প্রধান শিক্ষকের অনুমতি নিয়ে দিন।',
+                  'Tap "Sign now" and draw the signature with a finger. It is printed automatically on ID cards, admit cards, marksheets and forms. Upload only with the head teacher’s permission.',
                 )}
               </p>
             </div>
@@ -315,20 +307,9 @@ export default function SettingsPage() {
               <p className="text-sm text-ink/60">{tr('এখনো কোনো সই দেওয়া হয়নি।', 'No signature uploaded yet.')}</p>
             )}
             <div className="flex flex-wrap items-center gap-3">
-              <label className={`btn-primary cursor-pointer ${sigBusy ? 'opacity-60' : ''}`}>
-                {sigBusy ? tr('অপেক্ষা করুন…', 'Please wait…') : signature ? tr('সই বদলান', 'Change signature') : tr('সইয়ের ছবি দিন', 'Upload signature')}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={sigBusy}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    e.target.value = '';
-                    void pickSignature(f);
-                  }}
-                />
-              </label>
+              <button type="button" disabled={sigBusy} onClick={() => setPadOpen(true)} className="btn-primary disabled:opacity-60">
+                {sigBusy ? tr('অপেক্ষা করুন…', 'Please wait…') : signature ? tr('আবার সই করুন', 'Sign again') : tr('সই করুন', 'Sign now')}
+              </button>
               {signature && (
                 <button
                   type="button"
@@ -342,6 +323,16 @@ export default function SettingsPage() {
             </div>
             {sigMsg && <p className="text-sm text-ink">{sigMsg}</p>}
           </div>
+
+          {padOpen && (
+            <SignaturePad
+              onCancel={() => setPadOpen(false)}
+              onSave={(url) => {
+                setPadOpen(false);
+                void saveSignature(url);
+              }}
+            />
+          )}
 
           {formError && <p className="error-text">{formError}</p>}
           {saved && <p className="text-sm text-green-700">{tr('সংরক্ষিত হয়েছে।', 'Saved.')}</p>}
@@ -362,4 +353,4 @@ export default function SettingsPage() {
       )}
     </div>
   );
-    }
+      }
