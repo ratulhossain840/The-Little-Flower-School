@@ -31,6 +31,14 @@ interface HomeNotice {
   date?: string;
 }
 
+interface HomeGalleryItem {
+  id: string;
+  imageUrl?: string;
+  imagePath?: string;
+  captionBn?: string;
+  captionEn?: string;
+}
+
 /* ── Quick Action Cards ── */
 
 const QUICK_ACTIONS = [
@@ -60,6 +68,16 @@ export default function HomePage() {
     loadNotices();
   }, [loadNotices]);
   const latestNotices = (noticesApi.data?.items ?? []).slice(0, 3);
+
+  const galleryApi = useApi<{ items: HomeGalleryItem[] } | HomeGalleryItem[]>('get', '/api/gallery/published');
+  const { execute: loadGallery } = galleryApi;
+  useEffect(() => {
+    loadGallery();
+  }, [loadGallery]);
+  const galleryRaw = galleryApi.data;
+  const galleryItems = (Array.isArray(galleryRaw) ? galleryRaw : galleryRaw?.items ?? [])
+    .filter((g) => g.imageUrl || g.imagePath)
+    .slice(0, 4);
 
   const aboutText = !isBlank(site?.aboutText) ? site!.aboutText! : t('home.aboutText');
   const admissionText = !isBlank(site?.admissionText) ? site!.admissionText! : t('home.admissionText');
@@ -349,14 +367,26 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="flex aspect-square items-center justify-center rounded-xl bg-navy/5"
-              >
-                <ImageIcon size={32} className="text-navy/15" />
-              </div>
-            ))}
+            {galleryItems.length > 0
+              ? galleryItems.map((g) => (
+                  <Link
+                    key={g.id}
+                    to="/gallery"
+                    className="group relative aspect-square overflow-hidden rounded-xl bg-navy/5"
+                  >
+                    <img
+                      src={g.imageUrl || g.imagePath}
+                      alt={(isBengali ? g.captionBn || g.captionEn : g.captionEn || g.captionBn) || ''}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </Link>
+                ))
+              : [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex aspect-square items-center justify-center rounded-xl bg-navy/5">
+                    <ImageIcon size={32} className="text-navy/15" />
+                  </div>
+                ))}
           </div>
         </div>
       </section>
@@ -423,4 +453,4 @@ export default function HomePage() {
       </section>
     </>
   );
-}
+      }
